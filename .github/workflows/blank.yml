@@ -1,0 +1,70 @@
+name: Server and Client CI
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-server:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Download and Install Arduino CLI
+        run: |
+          Invoke-WebRequest -Uri https://downloads.arduino.cc/arduino-cli/arduino-cli_latest_Windows_64bit.zip -OutFile arduino-cli.zip
+          Expand-Archive -Path arduino-cli.zip -DestinationPath .\arduino-cli
+          $Env:PATH += ";$PWD\arduino-cli"
+
+      - name: Initialize Arduino CLI
+        run: |
+          .\arduino-cli\arduino-cli.exe config init
+
+      - name: Install ESP32 board
+        run: |
+          .\arduino-cli\arduino-cli.exe core update-index
+          .\arduino-cli\arduino-cli.exe core install esp32:esp32
+
+      - name: Build ESP32 server sketch
+        run: |
+          .\arduino-cli\arduino-cli.exe compile --fqbn esp32:esp32:esp32 server/server.ino
+          mkdir ci\build\server
+          copy .\.arduino\build\server.ino\server.ino.esp32.bin ci\build\server\esp32_server.bin
+
+      - name: Save server build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-build-artifacts
+          path: ci/build/server/esp32_server.bin
+
+  test-client:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install pyserial
+
+      - name: Run client test
+        run: |
+          python client/main.py > ci/build/client/test_output.txt
+
+      - name: Save client test output
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-test-output
+          path: ci/build/client/test_output.txt
