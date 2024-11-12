@@ -1,0 +1,65 @@
+name: CI Client and Server
+
+on:
+  push:
+    branches:
+      - main
+  pull_request:
+    branches:
+      - main
+
+jobs:
+  build-server:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Arduino CLI
+        uses: arduino/setup-arduino-cli@v1
+        with:
+          version: latest
+
+      - name: Install ESP32 board
+        run: |
+          arduino-cli core update-index
+          arduino-cli core install esp32:esp32
+
+      - name: Build ESP32 server sketch
+        run: |
+          mkdir -p ci/build/server
+          arduino-cli compile --fqbn esp32:esp32:esp32 server/server.ino -o ci/build/server/esp32_server
+
+      - name: Save server build artifacts
+        uses: actions/upload-artifact@v4
+        with:
+          name: server-build-artifacts
+          path: ci/build/server/esp32_server
+
+  test-client:
+    runs-on: windows-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v4
+        with:
+          python-version: '3.12.x'
+
+      - name: Install Python dependencies
+        run: |
+          pip install pyserial
+          
+
+      - name: Run client test
+        run: |
+          python client/main.py > ci/build/client/test_output.txt
+
+      - name: Save client test reports
+        uses: actions/upload-artifact@v4
+        with:
+          name: client-test-reports
+          path: ci/build/client/test_output.txt
