@@ -1,4 +1,4 @@
-name: CI Client and Server
+name: Server and Client CI
 
 on:
   push:
@@ -14,7 +14,7 @@ jobs:
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Download and Install Arduino CLI
         run: |
@@ -38,32 +38,33 @@ jobs:
           copy .\.arduino\build\server.ino\server.ino.esp32.bin ci\build\server\esp32_server.bin
 
       - name: Save server build artifacts
-        uses: actions/upload-artifact@v4
+        uses: actions/upload-artifact@v2
         with:
           name: server-build-artifacts
           path: ci/build/server/esp32_server.bin
-          retention-days: 7
 
   test-client:
     runs-on: windows-latest
 
     steps:
       - name: Checkout code
-        uses: actions/checkout@v4
+        uses: actions/checkout@v2
 
       - name: Set up Python
-        uses: actions/setup-python@v4
+        uses: actions/setup-python@v2
         with:
-          python-version: '3.12.x'
+          python-version: '3.7.x'
 
       - name: Install Python dependencies
         run: |
           pip install pyserial
 
-      - name: Create directory for test output
-        run: |
-          mkdir ci\build\client
-
       - name: Run client test
         run: |
           python client/main.py > ci/build/client/test_output.txt
+
+      - name: Save client test output
+        uses: actions/upload-artifact@v2
+        with:
+          name: client-test-output
+          path: ci/build/client/test_output.txt
