@@ -5,6 +5,7 @@ import time
 class ESP32_Communication:
     def __init__(self):
         self.ser = None
+        self.port = None
 
     def find_ports(self):
         return [p.device for p in serial.tools.list_ports.comports()]
@@ -21,7 +22,7 @@ class ESP32_Communication:
                 print(f"{i + 1}: {com}")
             selected_index = int(input("Select a COM port by number: ")) - 1
             if 0 <= selected_index < len(com_list):
-                port = com_list[selected_index]
+                self.port = com_list[selected_index]
                 break
             print("Invalid COM port selection.")
 
@@ -37,9 +38,9 @@ class ESP32_Communication:
             print("Invalid choice. Please try again.")
 
         try:
-            self.ser = serial.Serial(port, baudrate, timeout=1)
+            self.ser = serial.Serial(self.port, baudrate, timeout=1)
             time.sleep(1)
-            return f"Connected to {port}"
+            return f"Connected to {self.port}"
         except serial.SerialException as e:
             self.ser = None
             return f"Error: {e}"
@@ -60,15 +61,23 @@ class ESP32_Communication:
                 return f"Error: {e}"
         return "Port not opened"
 
+    def communication(self):
+        status = self.connect()
+        print(status)
+
+        if status == f"Connected to {self.port}":
+            while True:
+                user_input = input("Enter a message or exit: ")
+                if user_input == "exit":
+                    break
+
+                status = server.send_message(user_input)
+                print(status)
+
+                status = server.receive_message()
+                print(status)
+
 
 if __name__ == "__main__":
     server = ESP32_Communication()
-
-    status = server.connect()
-    print(status)
-
-    status = server.send_message("Msg from CLI")
-    print(status)
-
-    status = server.receive_message()
-    print(status)
+    server.communication()
