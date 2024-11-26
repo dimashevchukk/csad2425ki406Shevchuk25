@@ -2,6 +2,7 @@ import serial
 import serial.tools.list_ports
 import time
 
+
 class ESP32_Communication:
     def __init__(self):
         self.ser = None
@@ -14,7 +15,7 @@ class ESP32_Communication:
         com_list = self.find_ports()
 
         if len(com_list) == 0:
-            return "No serial ports found"
+            return "No serial ports found."
 
         while True:
             print("Available COM ports:")
@@ -40,16 +41,20 @@ class ESP32_Communication:
         try:
             self.ser = serial.Serial(self.port, baudrate, timeout=1)
             time.sleep(1)
-            return f"Connected to {self.port}"
+            return f"Connected to {self.port}."
         except serial.SerialException as e:
             self.ser = None
-            return f"Error: {e}"
+            return f"Error: {e}."
 
     def send_message(self, message):
-        if self.ser and self.ser.is_open:
+        if not self.ser or not self.ser.is_open:
+            return "Port not opened or connection lost."
+
+        try:
             self.ser.write((message + "\n").encode())
-            return f"Sent: {message}"
-        return "Port not opened"
+            return f"Sent: {message}."
+        except serial.SerialException as e:
+            return f"Connection lost: {e}"
 
     def receive_message(self):
         if self.ser and self.ser.is_open:
@@ -58,14 +63,14 @@ class ESP32_Communication:
                 if response:
                     return response
             except Exception as e:
-                return f"Error: {e}"
-        return "Port not opened"
+                return f"Error: {e}."
+        return "Port not opened."
 
     def communication(self):
         status = self.connect()
         print(status)
 
-        if status == f"Connected to {self.port}":
+        if status == f"Connected to {self.port}.":
             while True:
                 user_input = input("Enter a message or exit: ")
                 if user_input == "exit":
@@ -75,7 +80,7 @@ class ESP32_Communication:
                 print(status)
 
                 status = server.receive_message()
-                print(status)
+                print(f"Recieved: {status}")
 
 
 if __name__ == "__main__":
