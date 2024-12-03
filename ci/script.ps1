@@ -7,6 +7,7 @@ param (
 $board = "esp32:esp32:esp32wrover"
 $sketch = "server/server.ino"
 $deployFolder = "deploy"
+$libFolder = "lib"
 # ---------------------------------------------------------------------------------------
 
 function CheckArduinoCLI
@@ -19,6 +20,27 @@ function CheckArduinoCLI
 
     $version = & arduino-cli version
     Write-Output "Arduino-cli version: $version"
+}
+
+function CheckLibraries
+{
+    Write-Output "Checking libraries..."
+    if (-not (Test-Path $libFolder))
+    {
+        New-Item -ItemType Directory -Path $libFolder
+    }
+
+    if (-not (Test-Path "$libFolder/tinyxml2"))
+    {
+        Write-Output "Cloning tinyxml2 library..."
+        & git clone https://github.com/leethomason/tinyxml2.git "$libFolder/tinyxml2"
+        if ($LASTEXITCODE -ne 0)
+        {
+            Write-Output "Error cloning tinyxml2."
+            exit 1
+        }
+    }
+    Write-Output "Libraries prepared."
 }
 
 function CompileSketch
@@ -68,6 +90,7 @@ function RunTests
 }
 
 CheckArduinoCLI
+CheckLibraries
 CompileSketch
 UploadSketch
 RunTests
