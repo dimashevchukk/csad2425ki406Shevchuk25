@@ -5,8 +5,8 @@ param (
 )
 
 $board = "esp32:esp32:esp32wrover"
-$sketch = "E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\server\server.ino"
-$deployFolder = "E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\deploy"
+$sketch = "server\server.ino"
+$deployFolder = "deploy"
 # ---------------------------------------------------------------------------------------
 
 function CheckArduinoCLI
