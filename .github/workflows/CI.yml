@@ -46,8 +46,13 @@ jobs:
 
       - name: Download tinyxml2 library
         run: |
-          mkdir -p lib
+          mkdir -p lib/tinyxml2
           git clone https://github.com/leethomason/tinyxml2.git lib/tinyxml2
+
+      - name: Prepare tinyxml2 for Arduino CLI
+        run: |
+          mkdir -p lib/tinyxml2/src
+          mv lib/tinyxml2/*.h lib/tinyxml2/*.cpp lib/tinyxml2/src
 
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |
