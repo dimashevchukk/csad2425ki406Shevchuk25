@@ -44,18 +44,10 @@ jobs:
           arduino-cli core update-index
           arduino-cli core install esp32:esp32
 
-      - name: Download and Install TinyXML2 library
+      - name: Download and Install tinyxml2 library
         run: |
           mkdir -p ~/Arduino/libraries/tinyxml2
           git clone https://github.com/leethomason/tinyxml2.git ~/Arduino/libraries/tinyxml2          
-
-      - name: Verify TinyXML2 Library
-        run: |
-          ls -l ~/Arduino/libraries/tinyxml2
-
-      - name: Check Arduino Library Paths
-        run: |
-          arduino-cli config dump
 
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |

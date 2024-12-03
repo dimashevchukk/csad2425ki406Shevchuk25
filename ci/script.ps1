@@ -63,6 +63,12 @@ function CompileSketch
 
 function UploadSketch
 {
+    if ($env:GITHUB_ACTIONS -eq $true) # Check if running in GitHub Actions
+    {
+        Write-Output "Running in GitHub Actions - skipping device upload."
+        return
+    }
+
     Write-Output "Uploading sketch to esp32 through $port..."
     & arduino-cli upload -p $port --fqbn $board $sketch
     if ($LASTEXITCODE -ne 0)
