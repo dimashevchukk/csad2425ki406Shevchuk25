@@ -47,9 +47,15 @@ jobs:
       - name: Download and Install TinyXML2 library
         run: |
           mkdir -p ~/Arduino/libraries/tinyxml2
-          git clone https://github.com/leethomason/tinyxml2.git ~/Arduino/libraries/tinyxml2
-          cp ~/Arduino/libraries/tinyxml2/tinyxml2.h ~/Arduino/libraries/tinyxml2/
-          cp ~/Arduino/libraries/tinyxml2/tinyxml2.cpp ~/Arduino/libraries/tinyxml2/
+          git clone https://github.com/leethomason/tinyxml2.git ~/Arduino/libraries/tinyxml2          
+
+      - name: Verify TinyXML2 Library
+        run: |
+          ls -l ~/Arduino/libraries/tinyxml2
+
+      - name: Check Arduino Library Paths
+        run: |
+          arduino-cli config dump
 
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |
