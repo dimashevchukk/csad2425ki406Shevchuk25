@@ -5,7 +5,7 @@ param (
 )
 
 $board = "esp32:esp32:esp32wrover"
-$sketch = "server\server.ino"
+$sketch = "server/server.ino"
 $deployFolder = "deploy"
 # ---------------------------------------------------------------------------------------
 
