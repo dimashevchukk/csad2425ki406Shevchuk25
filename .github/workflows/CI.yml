@@ -49,10 +49,15 @@ jobs:
           mkdir -p lib/tinyxml2
           git clone https://github.com/leethomason/tinyxml2.git lib/tinyxml2
 
+      - name: Prepare tinyxml2 for Arduino CLI
+        run: |
+          mkdir -p lib/tinyxml2/src
+          mv lib/tinyxml2/*.h lib/tinyxml2/*.cpp lib/tinyxml2/src
+
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |
           mkdir -p build 
-          arduino-cli compile --fqbn esp32:esp32:esp32wrover --output-dir build --libraries lib/tinyxml2 server/server.ino
+          arduino-cli compile --fqbn esp32:esp32:esp32wrover --output-dir build --libraries lib server/server.ino
 
       - name: Run PowerShell script
         run: pwsh -File ci/script.ps1 COM3 115200
