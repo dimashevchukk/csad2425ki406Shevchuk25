@@ -1,3 +1,8 @@
+# Tests results / libraries / generated binary files
+test-reports/
+lib/
+deploy/
+
 # Byte-compiled / optimized / DLL files
 __pycache__/
 *.py[cod]
