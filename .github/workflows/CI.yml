@@ -51,8 +51,8 @@ jobs:
 
       - name: Prepare tinyxml2 for Arduino CLI
         run: |
-          mkdir -p lib/tinyxml2/src
-          mv lib/tinyxml2/*.h lib/tinyxml2/*.cpp lib/tinyxml2/src
+          mkdir -p lib/tinyxml2
+          mv lib/tinyxml2/*.h lib/tinyxml2/*.cpp lib/tinyxml2
 
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |
