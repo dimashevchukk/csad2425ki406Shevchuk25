@@ -1,4 +1,4 @@
-name: CI task2
+name: CI task3
 
 on:
   push:

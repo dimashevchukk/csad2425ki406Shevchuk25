@@ -63,7 +63,7 @@ function CompileSketch
 
 function UploadSketch
 {
-    if ($env:GITHUB_ACTIONS -eq $true) # Check if running in GitHub Actions
+    if ($env:GITHUB_ACTIONS -eq $true)
     {
         Write-Output "Running in GitHub Actions - skipping device upload."
         return

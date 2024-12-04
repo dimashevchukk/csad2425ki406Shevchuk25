@@ -6,7 +6,6 @@ from unittest.mock import patch, MagicMock, mock_open
 from xml.etree import ElementTree as ET
 
 from esp32_communication import esp32
-from UI import TicTacToe
 
 
 class TestESP32Communication(unittest.TestCase):
@@ -120,10 +119,6 @@ class TestESP32Communication(unittest.TestCase):
         server = esp32()
         result = server.receive_message()
         self.assertEqual(result, "Port not opened or connection lost.")
-
-
-class TestUI(unittest.TestCase):
-    pass
 
 
 class TestESP32Server(unittest.TestCase):
