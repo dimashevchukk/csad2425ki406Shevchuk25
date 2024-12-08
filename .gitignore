@@ -1,7 +1,8 @@
-# Tests results / libraries / generated binary files
+# Tests results / libraries / generated files
 test-reports/
 lib/
 deploy/
+docs/
 
 # Byte-compiled / optimized / DLL files
 __pycache__/
