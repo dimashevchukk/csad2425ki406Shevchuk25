@@ -1,10 +1,10 @@
-name: CI task3
+name: CI task4
 
 on:
   push:
     branches:
       - develop
-      - feature/develop/task3
+      - feature/develop/task4
   pull_request:
     branches:
       - develop
@@ -49,12 +49,35 @@ jobs:
           mkdir -p ~/Arduino/libraries/tinyxml2
           git clone https://github.com/leethomason/tinyxml2.git ~/Arduino/libraries/tinyxml2          
 
+      - name: Install Doxygen
+        run: |
+          sudo apt-get update
+          sudo apt-get install -y doxygen      
+
       - name: Compile Arduino Sketch for ESP32 WROOM-32
         run: |
           arduino-cli compile --fqbn esp32:esp32:esp32wrover --output-dir build --libraries ~/Arduino/libraries server/server.ino
 
       - name: Run PowerShell script
         run: pwsh -File ci/script.ps1 COM3 115200
+
+      - name: Generate Doxygen Documentation
+        run: |
+          doxygen -g Doxyfile
+          sed -i 's|OUTPUT_DIRECTORY.*|OUTPUT_DIRECTORY = ./docs|' Doxyfile
+          sed -i 's|INPUT.*|INPUT = ./|' Doxyfile
+          sed -i 's|RECURSIVE.*|RECURSIVE = YES|' Doxyfile
+          sed -i 's|EXCLUDE.*|EXCLUDE = ./lib|' Doxyfile
+          sed -i 's|FILE_PATTERNS.*|FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc|' Doxyfile
+          sed -i 's|EXTENSION_MAPPING.*|EXTENSION_MAPPING = ino=C++|' Doxyfile
+          sed -i 's|EXTRACT_ALL.*|EXTRACT_ALL = YES|' Doxyfile
+          doxygen Doxyfile
+
+      - name: Upload documentation
+        uses: actions/upload-artifact@v4
+        with:
+          name: docs
+          path: docs/html
 
       - name: Upload binaries reports
         uses: actions/upload-artifact@v4

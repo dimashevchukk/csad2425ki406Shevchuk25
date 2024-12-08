@@ -1,17 +1,61 @@
+/**
+ * @file
+ * @brief Server-side implementation for a Tic Tac Toe game using TinyXML2 and Serial communication.
+ * This file implements a server that handles requests for different game modes
+ * and gameplay in a Tic-Tac-Toe game.
+ */
+
 #include <tinyxml2.h>
 
+/// @brief String stores the current game mode ("pvp", "pvbot", or "botvbot").
 String gameMode;
+
+/// @brief Char 3x3 board for the Tic Tac Toe game.
 char board[3][3];
 
+/**
+ * @brief Handles requests to set the game mode.
+ * @param root XML element containing the mode request data.
+ */
 void handleModeRequest(tinyxml2::XMLElement* root);
+
+/**
+ * @brief Handles player vs player (PvP) game requests.
+ * @param root XML element containing the PvP request data.
+ */
 void handlePVPRequest(tinyxml2::XMLElement* root);
+
+/**
+ * @brief Handles player vs bot (PvBot) game requests.
+ * @param root XML element containing the PvBot request data.
+ */
 void handlePVBotRequest(tinyxml2::XMLElement* root);
+
+/**
+ * @brief Starts a bot vs bot (BotVBot) game loop.
+ */
 void startBotVBot();
 
+/**
+ * @brief Generates a random move for the bot.
+ * @return A pair of integers representing the x and y coordinates of the bot's move.
+ */
 std::pair<int, int> randomBotMove();
+
+/**
+ * @brief Checks the current game status to determine if there is a winner, a draw, or if the game should continue.
+ * @return A string representing the game status ("X", "O", "Draw", or "Continue").
+ */
 String checkWin();
+
+/**
+ * @brief Clears the game board to its initial state.
+ */
 void cleanBoard();
 
+/**
+ * @brief Sets up the Serial communication and initializes the server.
+ */
 void setup()
 {
   Serial.begin(115200);
@@ -19,16 +63,11 @@ void setup()
   {
     delay(100);
   } 
-
-  for (int i = 0; i < 3; i++) 
-  {
-    for (int j = 0; j < 3; j++) 
-    {
-      board[i][j] = ' ';
-    }
-  } 
 }
 
+/**
+ * @brief Main server loop to handle incoming requests.
+ */
 void loop()
 {
   if (Serial.available() > 0)

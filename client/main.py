@@ -1,3 +1,7 @@
+##
+# @file
+# @brief Point where the game begins
+
 from UI import TicTacToe
 
 
