@@ -3,7 +3,7 @@ $doxygenInstallerUrl = "https://doxygen.nl/files/doxygen-1.12.0-setup.exe"
 $doxygenInstallerPath = "$env:TEMP\doxygen-setup.exe"
 $projectDir = Join-Path -Path $PSScriptRoot -ChildPath ".."
 $outputDir = "$projectDir\docs"
-$doxyfilePath = "$projectDir\Doxygen"
+$doxyfilePath = "$projectDir\Doxyfile"
 # ---------------------------------------------------------------------------------------
 
 function CheckDoxygen
@@ -26,7 +26,6 @@ function CheckDoxygen
 
         $doxygenPath = "C:\Program Files\doxygen\bin"
         [System.Environment]::SetEnvironmentVariable("Path", $env:Path + ";$doxygenPath", [System.EnvironmentVariableTarget]::Machine)
-
     }
     else
     {
@@ -53,8 +52,10 @@ function UpdateConfig
     (Get-Content $doxyfilePath) -replace 'OUTPUT_DIRECTORY.*', "OUTPUT_DIRECTORY = $outputDir" | Set-Content $doxyfilePath
     (Get-Content $doxyfilePath) -replace 'INPUT.*', "INPUT = $projectDir" | Set-Content $doxyfilePath
     (Get-Content $doxyfilePath) -replace 'RECURSIVE.*', "RECURSIVE = YES" | Set-Content $doxyfilePath
-    (Get-Content $doxyfilePath) -replace 'EXCLUDE .*', "EXCLUDE = $projectDir\lib" | Set-Content $doxyfilePath #ignoring directory lib
-    (Get-Content $doxyfilePath) -replace 'FILE_PATTERNS.*', "FILE_PATTERNS = *.cpp *.h *.py *.ino" | Set-Content $doxyfilePath #files for documentation generation
+    (Get-Content $doxyfilePath) -replace 'EXCLUDE .*', "EXCLUDE = $projectDir\lib" | Set-Content $doxyfilePath
+    (Get-Content $doxyfilePath) -replace 'FILE_PATTERNS.*', "FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc" | Set-Content $doxyfilePath
+    (Get-Content $doxyfilePath) -replace 'EXTENSION_MAPPING.*', "EXTENSION_MAPPING = ino=C++" | Set-Content $doxyfilePath
+    (Get-Content $doxyfilePath) -replace 'EXTRACT_ALL.*', "EXTRACT_ALL = YES" | Set-Content $doxyfilePath
 }
 
 function GenerateDocumentation

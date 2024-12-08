@@ -63,13 +63,15 @@ jobs:
 
       - name: Generate Doxygen Documentation
         run: |
-          doxygen -g 
-          sed -i 's|OUTPUT_DIRECTORY.*|OUTPUT_DIRECTORY = ./docs|' Doxygen
-          sed -i 's|INPUT.*|INPUT = ./|' Doxygen
-          sed -i 's|RECURSIVE.*|RECURSIVE = YES|' Doxygen
-          sed -i 's|EXCLUDE.*|EXCLUDE = ./lib|' Doxygen
-          sed -i 's|FILE_PATTERNS.*|FILE_PATTERNS = *.cpp *.h *.py *.ino|' Doxygen
-          doxygen Doxygen
+          doxygen -g Doxyfile
+          sed -i 's|OUTPUT_DIRECTORY.*|OUTPUT_DIRECTORY = ./docs|' Doxyfile
+          sed -i 's|INPUT.*|INPUT = ./|' Doxyfile
+          sed -i 's|RECURSIVE.*|RECURSIVE = YES|' Doxyfile
+          sed -i 's|EXCLUDE.*|EXCLUDE = ./lib|' Doxyfile
+          sed -i 's|FILE_PATTERNS.*|FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc|' Doxyfile
+          sed -i 's|EXTENSION_MAPPING.*|EXTENSION_MAPPING = ino=C++|' Doxyfile
+          sed -i 's|EXTRACT_ALL.*|EXTRACT_ALL = YES|' Doxyfile
+          doxygen Doxyfile
 
       - name: Upload documentation
         uses: actions/upload-artifact@v4

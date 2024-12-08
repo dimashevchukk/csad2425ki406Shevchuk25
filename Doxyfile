@@ -299,13 +299,13 @@ ALIASES                =
 
 OPTIMIZE_OUTPUT_FOR_C  = NO
 
-# Set the OPTIMIZE_OUTPUT_JAVA = NO
+# Set the OPTIMIZE_OUTPUT_JAVA tag to YES if your project consists of Java or
 # Python sources only. Doxygen will then generate output that is more tailored
 # for that language. For instance, namespaces will be presented as packages,
 # qualified scopes will look different, etc.
 # The default value is: NO.
 
-OPTIMIZE_OUTPUT_JAVA = NO
+OPTIMIZE_OUTPUT_JAVA   = NO
 
 # Set the OPTIMIZE_FOR_FORTRAN tag to YES if your project consists of Fortran
 # sources. Doxygen will then generate output that is tailored for Fortran.
@@ -342,13 +342,13 @@ OPTIMIZE_OUTPUT_SLICE  = NO
 #
 # Note: For files without extension you can use no_extension as a placeholder.
 #
-# Note that for custom extensions you also need to set FILE_PATTERNS = *.cpp *.h *.py *.ino
+# Note that for custom extensions you also need to set FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 # the files are not read by Doxygen. When specifying no_extension you should add
-# * to the FILE_PATTERNS = *.cpp *.h *.py *.ino
+# * to the FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 #
 # Note see also the list of default file extension mappings.
 
-EXTENSION_MAPPING = py=Python cpp=C++ ino=C++
+EXTENSION_MAPPING = ino=C++
 
 # If the MARKDOWN_SUPPORT tag is enabled then Doxygen pre-processes all comments
 # according to the Markdown format, which allows for more readable
@@ -519,18 +519,18 @@ TIMESTAMP              = NO
 # If the EXTRACT_ALL = YES
 # documentation are documented, even if no documentation was available. Private
 # class members and static file members will be hidden unless the
-# EXTRACT_PRIVATE = YES
+# EXTRACT_PRIVATE respectively EXTRACT_STATIC tags are set to YES.
 # Note: This will also disable the warnings about undocumented members that are
 # normally produced when WARNINGS is set to YES.
 # The default value is: NO.
 
 EXTRACT_ALL = YES
 
-# If the EXTRACT_PRIVATE = YES
+# If the EXTRACT_PRIVATE tag is set to YES, all private members of a class will
 # be included in the documentation.
 # The default value is: NO.
 
-EXTRACT_PRIVATE = YES
+EXTRACT_PRIVATE        = NO
 
 # If the EXTRACT_PRIV_VIRTUAL tag is set to YES, documented private virtual
 # methods of a class will be included in the documentation.
@@ -962,7 +962,7 @@ WARN_LOGFILE           =
 # The INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 # documented source files. You may enter file names like myfile.cpp or
 # directories like /usr/src/myproject. Separate the files or directories with
-# spaces. See also FILE_PATTERNS = *.cpp *.h *.py *.ino
+# spaces. See also FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 # Note: If this tag is empty the current directory is searched.
 
 INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
@@ -988,11 +988,11 @@ INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 
 # If the value of the INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
-# FILE_PATTERNS = *.cpp *.h *.py *.ino
+# FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 # *.h) to filter out the source-files in the directories.
 #
 # Note that for custom extensions or not directly supported extensions you also
-# need to set EXTENSION_MAPPING = py=Python cpp=C++ ino=C++
+# need to set EXTENSION_MAPPING = ino=C++
 # read by Doxygen.
 #
 # Note the list of default checked file patterns might differ from the list of
@@ -1005,7 +1005,7 @@ INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 # be provided as Doxygen C comment), *.py, *.pyw, *.f90, *.f95, *.f03, *.f08,
 # *.f18, *.f, *.for, *.vhd, *.vhdl, *.ucf, *.qsf and *.ice.
 
-FILE_PATTERNS = *.cpp *.h *.py *.ino
+FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
                          *.cc \
                          *.cxx \
                          *.cxxm \
@@ -1143,7 +1143,7 @@ IMAGE_PATH             =
 # written to standard output.
 #
 # Note that for custom extensions or not directly supported extensions you also
-# need to set EXTENSION_MAPPING = py=Python cpp=C++ ino=C++
+# need to set EXTENSION_MAPPING = ino=C++
 # properly processed by Doxygen.
 
 INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
@@ -1156,7 +1156,7 @@ INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 # patterns match the file name, INPUT = E:\NULP\4course\1sm\APKS\TicTacToe\csad2425ki406Shevchuk25\ci\..
 #
 # Note that for custom extensions or not directly supported extensions you also
-# need to set EXTENSION_MAPPING = py=Python cpp=C++ ino=C++
+# need to set EXTENSION_MAPPING = ino=C++
 # properly processed by Doxygen.
 
 FILTER_PATTERNS        =
@@ -2472,13 +2472,13 @@ SEARCH_INCLUDES        = YES
 
 INCLUDE_PATH           =
 
-# You can use the INCLUDE_FILE_PATTERNS = *.cpp *.h *.py *.ino
+# You can use the INCLUDE_FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 # patterns (like *.h and *.hpp) to filter out the header-files in the
-# directories. If left blank, the patterns specified with FILE_PATTERNS = *.cpp *.h *.py *.ino
+# directories. If left blank, the patterns specified with FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 # used.
 # This tag requires that the tag ENABLE_PREPROCESSING is set to YES.
 
-INCLUDE_FILE_PATTERNS = *.cpp *.h *.py *.ino
+INCLUDE_FILE_PATTERNS = *.cpp *.h *.py *.ino *.c *.cc
 
 # The PREDEFINED tag can be used to specify one or more macro names that are
 # defined before the preprocessor is started (similar to the -D option of e.g.
