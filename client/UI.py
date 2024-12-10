@@ -1,9 +1,20 @@
+##
+# @file
+# @brief UI and logic for TicTacToe game
+# @author Dmytro Shevchuk KI-406
+# @version 4
+
 import tkinter as tk
 from esp32_communication import esp32
 import xml.etree.ElementTree as ET
 
-
+##
+# @class TicTacToe
+# @brief A class for managing the Tic Tac Toe game, including game logic, UI, and communication with ESP32.
 class TicTacToe:
+    ##
+    # @brief Initializes the TicTacToe class.
+    # Sets up the game variables, UI elements, and ESP32 communication object.
     def __init__(self):
         self.esp = esp32()
 
@@ -13,21 +24,35 @@ class TicTacToe:
         self.root.resizable(False, False)
         self.root.config(bg='black')
 
+        ## @param game_mode: Stores the current game mode (e.g., "pvp", "pvbot", "botvbot").
         self.game_mode = None
+        ## @param gameover: Indicates whether the game has ended.
         self.gameover = None
+        ## @param game_result: Stores the result of the game.
         self.game_result = None
+        ## @param file_name: Path to the XML file for saving/loading game state.
         self.file_name = "game_state.xml"
+        ## @param current_player: The current player ('X' or 'O').
         self.current_player = 'X'
+        ## @param buttons: UI buttons for the game board.
         self.buttons = [[None for _ in range(3)] for _ in range(3)]
+        ## @param board: The game board state.
         self.board = [[" " for _ in range(3)] for _ in range(3)]
+        ## @param info_label: Label to display current player information.
         self.info_label = None
 
+    ##
+    # @brief Starts the main loop of the game.
+    # Configures the starting setup and displays the main menu.
     def start(self):
         self.start_config()
         self.create_main_menu()
         self.root.protocol("WM_DELETE_WINDOW", self.on_close)
         self.root.mainloop()
 
+    ##
+    # @brief Configures the game by connecting to ESP32.
+    # Offers the user a choice to input settings manually or load them from a file.
     def start_config(self):
         while True:
             choice = int(input("Start by\n1) Input\n2) Settings txt file\n"))
@@ -42,6 +67,9 @@ class TicTacToe:
             else:
                 print("Invalid choice")
 
+    ##
+    # @brief Creates the main menu of the game.
+    # Adds buttons for different game modes and the option to load a saved game.
     def create_main_menu(self):
         title_label = tk.Label(self.root, text="Tic Tac Toe", font=("Arial", 24), bg="black", fg="white")
         title_label.pack(pady=20)
@@ -58,6 +86,9 @@ class TicTacToe:
         load_game_button = tk.Button(self.root, text="Load Game", font=("Arial", 16), width=20, command=self.load_game)
         load_game_button.pack(pady=120)
 
+    ##
+    # @brief Starts a new game in the specified mode.
+    # @param game_mode The game mode to start (e.g., "pvp", "pvbot", "botvbot").
     def start_game(self, game_mode):
         self.board = [[" " for _ in range(3)] for _ in range(3)]
         self.current_player = 'X'
@@ -77,6 +108,9 @@ class TicTacToe:
         self.create_board()
         self.handle_response(response)
 
+    ##
+    # @brief Creates the UI board for the game.
+    # Sets up buttons for each cell of the board and displays the current player's turn.
     def create_board(self):
         for widget in self.root.winfo_children():
             widget.destroy()
@@ -109,6 +143,10 @@ class TicTacToe:
         self.back_button = tk.Button(self.root, text="Back to Menu", font=("Arial", 14), command=self.back_to_menu, bg="white", fg="black")
         self.back_button.place(x=20, y=20)
 
+    ##
+    # @brief Saves the current game state to txt file.
+    # Creates an XML structure to save the current game state, including the board,
+    # current player, game result, and game mode. The XML is then written to a file.
     def save_game(self):
         root = ET.Element("GameState")
         board_element = ET.SubElement(root, "Board")
@@ -130,6 +168,11 @@ class TicTacToe:
         tree.write(self.file_name, encoding="utf-8", xml_declaration=True)
         print(f"Game saved to {self.file_name}")
 
+    ##
+    # @brief Loads the current game state from txt file.
+    # Load a previously saved game state from an XML file. The board,
+    # current player, and game mode are restored. If the game is over,
+    # it updates the UI to reflect the game result. Handles errors for missing or corrupted files.
     def load_game(self):
         try:
             tree = ET.parse(self.file_name)
@@ -155,12 +198,23 @@ class TicTacToe:
         except ET.ParseError:
             print(f"Error: Failed to parse the XML file {self.file_name}.")
 
+    ##
+    # @brief Loads the current game state from txt file.
+    # Load a previously saved game state from an XML file. The board,
+    # current player, and game mode are restored. If the game is over,
+    # it updates the UI to reflect the game result. Handles errors for missing or corrupted files.
     def back_to_menu(self):
         for widget in self.root.winfo_children():
             widget.destroy()
         self.save_game()
         self.create_main_menu()
 
+    ##
+    # @brief Makes a move from current player.
+    # Updates the board with the current player's move, sends the move to the server,
+    # and switches to the next player if the game is not over.
+    # @param row: The row index of the move.
+    # @param col: The column index of the move.
     def make_move(self, row, col):
         self.board[row][col] = self.current_player
         self.buttons[row][col].config(text=self.current_player, state="disabled")
@@ -169,6 +223,12 @@ class TicTacToe:
         if not self.gameover:
             self.change_player()
 
+    ##
+    # @brief Sends a move to the server.
+    # Creates an XML message to send the current player's move to the server.
+    # The move is then transmitted and the response is handled.
+    # @param row: The row index of the move.
+    # @param col: The column index of the move.#
     def send_move(self, row, col):
         root = ET.Element("request", type="move")
         player = ET.SubElement(root, "player", name=self.current_player)
@@ -182,6 +242,12 @@ class TicTacToe:
         print(f"Received: {response}")
         self.handle_response(response)
 
+    ##
+    # @brief Handles the response received from the server.
+    # Handles the server's response after a move is sent.
+    # It processes different response types, such as "mode", "move", "gameover"
+    # and "error". Based on the response, it triggers corresponding actions.
+    # @param response: The XML response from the server.
     def handle_response(self, response):
         try:
             root = ET.fromstring(response)
@@ -196,8 +262,6 @@ class TicTacToe:
                     self.handle_move(root)
                 elif response_type == "gameover":
                     self.game_over(root)
-                elif response_type == "continue":
-                    print("Continue")
                 elif response_type == "error":
                     error_message = root.text.strip() if root.text else "Unknown error"
                     print(f"Error: {error_message}")
@@ -206,6 +270,11 @@ class TicTacToe:
         except ET.ParseError:
             print("Error parsing XML response")
 
+    ##
+    # @brief Handles the move received from the server.
+    # Processes the move information from the server's response, updating the board
+    # and switching the player. If game status is not continue, it ends the game.
+    # @param root: The parsed XML root element containing the move data.
     def handle_move(self, root):
         status = root.find("status").attrib.get("name")
         move = root.find("move")
@@ -220,11 +289,20 @@ class TicTacToe:
         if status != "Continue":
             self.game_over(root)
 
+    ##
+    # @brief Handles the botvbot move received from the server.
+    # Disables the game board buttons and the back button, then starts processing the
+    # bot's move in a "Bot VS Bot" game mode.
     def handle_bot_v_bot(self):
         self.disable_all_buttons()
         self.back_button.config(state="disabled")
         self.process_bot_move()
 
+    ##
+    # @brief Processes the botvbot move received from the server.
+    # Processes a move from the bot by receiving the response from the server,
+    # updating the board with the bot's move, and checking if the game is over.
+    # If the game is not over, it waits before processing the next bot move.
     def process_bot_move(self):
         response = self.esp.receive_message()
         print(f"Received: {response}")
@@ -246,6 +324,11 @@ class TicTacToe:
         else:
             self.root.after(1000, self.process_bot_move)
 
+    ##
+    # @brief Handles the game over.
+    # Handles the end of the game based on the server's response.
+    # It checks the game status and updates the game result (win, draw) and the UI accordingly.
+    # Status X means player X won, as well Y.
     def game_over(self, root):
         status = root.find("status").attrib.get("name")
         if status == "X" or status == "O":
@@ -259,16 +342,27 @@ class TicTacToe:
             self.info_label.config(text=self.game_result)
             self.disable_all_buttons()
 
+    ##
+    # @brief Disables all buttons.
+    # Disables all the game buttons, preventing further moves.
     def disable_all_buttons(self):
         for row in self.buttons:
             for button in row:
                 button.config(state="disabled")
 
+    ##
+    # @brief Changes the player'
+    # Switches the current player between 'X' and 'O', and updates the displayed player in the UI.
     def change_player(self):
         self.current_player = 'O' if self.current_player == 'X' else 'X'
         self.info_label.config(text=f"Current player: {self.current_player}")
 
+    ##
+    # @brief Handles the close button.
+    # Saves the current game state and quits the game when the window is closed.
+    # Closes connection with server.
     def on_close(self):
         self.save_game()
         self.root.quit()
+        self.esp.close_connection()
         print("Game closed")
