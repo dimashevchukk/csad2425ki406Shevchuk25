@@ -5,8 +5,8 @@
 # @version 4
 
 import tkinter as tk
-from esp32_communication import esp32
 import xml.etree.ElementTree as ET
+from esp32_communication import esp32
 
 ##
 # @class TicTacToe

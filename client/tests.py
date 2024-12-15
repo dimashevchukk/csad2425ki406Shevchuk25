@@ -4,11 +4,12 @@
 
 import serial
 import unittest
+import tkinter as tk
 
 from unittest.mock import patch, MagicMock, mock_open
 from xml.etree import ElementTree as ET
-
 from esp32_communication import esp32
+from UI import TicTacToe
 
 
 ##
@@ -156,6 +157,368 @@ class TestESP32Communication(unittest.TestCase):
         server = esp32() # No serial connection initialized
         result = server.receive_message()
         self.assertEqual(result, "Port not opened or connection lost.")
+
+
+##
+# @class TestUI
+# @brief Test graphic interface.
+class TestUI(unittest.TestCase):
+    ##
+    # @brief Set up game and esp
+    def setUp(self):
+        self.game = TicTacToe()
+        self.game.esp = esp32()
+
+    ##
+    # @brief Destroy window root
+    def tearDown(self):
+        self.game.root.destroy()
+
+    ##
+    # @brief Test that main menu contains all required buttons.
+    def test_initial_main_menu_elements(self):
+        self.game.create_main_menu()
+
+        button_texts = [
+            "Player VS Player",
+            "Player VS Bot",
+            "Bot VS Bot",
+            "Load Game"
+        ]
+
+        for text in button_texts:
+            found = False
+            for widget in self.game.root.winfo_children():
+                if isinstance(widget, tk.Button) and widget.cget('text') == text:
+                    found = True
+                    break
+            self.assertTrue(found, f"Button '{text}' not found in main menu")
+
+    ##
+    # @brief Test game mode selection initiates correct game setup.
+    def test_game_mode_selection(self):
+        game_modes = ["pvp", "pvbot", "botvbot"]
+
+        for mode in game_modes:
+            with patch.object(self.game, 'create_board') as mock_create_board:
+                # Reset game state
+                self.game.board = [[" " for _ in range(3)] for _ in range(3)]
+                self.game.start_game(mode)
+
+                # Assert game state is correctly set
+                self.assertEqual(self.game.game_mode, mode)
+                self.assertEqual(self.game.current_player, 'X')
+                self.assertFalse(self.game.gameover)
+
+                # Verify board creation was called
+                mock_create_board.assert_called_once()
+
+    ##
+    # @brief Test board creation UI elements.
+    def test_board_creation(self):
+        self.game.start_game("pvp")
+        self.assertEqual(len(self.game.buttons), 3)
+
+        for row in self.game.buttons:
+            self.assertEqual(len(row), 3)
+            for button in row:
+                self.assertIsInstance(button, tk.Button)
+                self.assertEqual(button.cget('text'), ' ')
+
+    ##
+    # @brief Test move validation and UI update.
+    def test_move_validation(self):
+        self.game.start_game("pvp")
+
+        row, col = 1, 1
+        self.game.make_move(row, col)
+
+        self.assertEqual(self.game.board[row][col], 'X')
+        self.assertEqual(self.game.buttons[row][col].cget('text'), 'X')
+        self.assertEqual(self.game.buttons[row][col].cget('state'), 'disabled')
+
+    ##
+    # @brief Test player switching mechanism.
+    def test_player_switch(self):
+        self.game.start_game("pvp")
+
+        self.assertEqual(self.game.current_player, 'X')
+        self.assertTrue('X' in self.game.info_label.cget('text'))
+
+        self.game.make_move(0, 0)
+        self.assertEqual(self.game.current_player, 'O')
+        self.assertTrue('O' in self.game.info_label.cget('text'))
+
+    ##
+    # @brief Test game saving and loading functionality.
+    def test_game_save_and_load(self):
+        self.game.start_game("pvp")
+        self.game.make_move(0, 0)
+        self.game.make_move(1, 1)
+        self.game.save_game()
+
+        new_game = TicTacToe()
+        new_game.load_game()
+
+        self.assertEqual(new_game.board[0][0], 'X')
+        self.assertEqual(new_game.board[1][1], 'O')
+        self.assertEqual(new_game.current_player, 'X')
+
+    ##
+    # @brief Test error handling during game loading.
+    @patch('xml.etree.ElementTree.parse')
+    def test_load_game_error_handling(self, mock_parse):
+        mock_parse.side_effect = FileNotFoundError()
+
+        with patch('builtins.print') as mock_print:
+            self.game.load_game()
+            mock_print.assert_called_with(f"Error: File {self.game.file_name} not found.")
+
+        mock_parse.side_effect = ET.ParseError()
+
+        with patch('builtins.print') as mock_print:
+            self.game.load_game()
+            mock_print.assert_called_with(f"Error: Failed to parse the XML file {self.game.file_name}.")
+
+    ##
+    # @brief Test starting by choosing manual input
+    def test_start_config_manual_input(self):
+        # Configure the mock connect method to return a specific value
+        self.game.esp.connect = MagicMock(return_value="Connected successfully")
+
+        # Simulate manual input
+        with patch('builtins.input', return_value='1'), \
+                patch('builtins.print') as mock_print:
+            # Call the method
+            self.game.start_config()
+
+            # Assert that connect was called
+            self.game.esp.connect.assert_called_once()
+
+            # Verify the print output
+            mock_print.assert_called_with("Connected successfully")
+
+    ##
+    # @brief Test starting by choosing file input.
+    def test_start_config_file_input(self):
+        # Configure the mock connect_from_file method to return a specific value
+        self.game.esp.connect_from_file = MagicMock(return_value="Loaded from file")
+
+        # Simulate file input
+        with patch('builtins.input', return_value='2'), \
+                patch('builtins.print') as mock_print:
+            # Call the method
+            self.game.start_config()
+
+            # Assert that connect_from_file was called with the correct filename
+            self.game.esp.connect_from_file.assert_called_once_with("connection_settings.txt")
+
+            # Verify the print output
+            mock_print.assert_called_with("Loaded from file")
+
+    ##
+    # @brief Test invalid input while starting.
+    def test_invalid_input(self):
+        # Test handling of invalid input
+        with patch('builtins.input', side_effect=['3', '1']):
+            self.game.esp.connect = MagicMock(return_value="Connected successfully")
+
+            with patch('builtins.print') as mock_print:
+                self.game.start_config()
+
+                # Verify that "Invalid choice" was printed
+                mock_print.assert_any_call("Invalid choice")
+                # Verify that connect was eventually called
+                self.game.esp.connect.assert_called_once()
+
+    ##
+    # @brief Test returning to menu.
+    def test_back_to_menu(self):
+        # Setup: Create some widgets to destroy
+        tk.Button(self.game.root, text="Test Button").pack()
+
+        # Mock save_game and create_main_menu methods
+        with patch.object(self.game, 'save_game'), \
+                patch.object(self.game, 'create_main_menu'):
+            self.game.back_to_menu()
+
+            # Verify that save_game and create_main_menu were called
+            self.game.save_game.assert_called_once()
+            self.game.create_main_menu.assert_called_once()
+
+            # Check that all widgets were destroyed
+            self.assertEqual(len(self.game.root.winfo_children()), 0)
+
+    ##
+    # @brief Test handling response.
+    def test_handle_response_mode(self):
+        # XML for bot vs bot mode
+        xml_response = '''
+        <response type="mode">
+            <mode name="botvbot"/>
+        </response>
+        '''
+
+        # Mock handle_bot_v_bot method
+        with patch.object(self.game, 'handle_bot_v_bot') as mock_handle_bot:
+            self.game.handle_response(xml_response)
+            self.game.handle_bot_v_bot.assert_called_once()
+
+    ##
+    # @brief Test handling response type move.
+    def test_handle_response_move(self):
+        # XML for a move response
+        xml_response = '''
+        <response type="move">
+            <status name="Continue"/>
+            <move x="1" y="2"/>
+        </response>
+        '''
+        # Mock handle_move method
+        with patch.object(self.game, 'handle_move') as mock_handle_move:
+            self.game.handle_response(xml_response)
+            mock_handle_move.assert_called_once()
+
+    ##
+    # @brief Test handling response type gameover.
+    def test_handle_response_gameover(self):
+        # XML for game over response
+        xml_response = '''
+        <response type="gameover">
+            <status name="X"/>
+        </response>
+        '''
+
+        # Mock game_over method
+        with patch.object(self.game, 'game_over') as mock_game_over:
+            self.game.handle_response(xml_response)
+            mock_game_over.assert_called_once()
+
+    ##
+    # @brief Test handling response type move.
+    def test_handle_move(self):
+        # Prepare XML for move
+        root = ET.fromstring('''
+        <response type="move">
+            <status name="Continue"/>
+            <move x="1" y="2"/>
+        </response>
+        ''')
+
+        # Set initial state
+        self.game.info_label = MagicMock()
+        self.game.board = [[" " for _ in range(3)] for _ in range(3)]
+        self.game.buttons = [[MagicMock() for _ in range(3)] for _ in range(3)]
+
+        # Call handle_move
+        self.game.handle_move(root)
+
+        # Verify board and player change
+        self.assertEqual(self.game.board[1][2], self.game.current_player)
+        self.assertEqual(self.game.current_player, 'O')
+
+        # Verify button was updated
+        self.game.buttons[1][2].config.assert_called_with(
+            text=self.game.current_player,
+            state="disabled"
+        )
+
+        # Verify info_label was updated
+        self.game.info_label.config.assert_called_with(
+            text=f"Current player: {self.game.current_player}"
+        )
+
+    ##
+    # @brief Test handling response type gameover and player X wins.
+    def test_game_over_x_win(self):
+        # Prepare game over XML for X win
+        root = ET.fromstring('''
+        <response type="gameover">
+            <status name="X"/>
+        </response>
+        ''')
+
+        # Mock info_label and disable_all_buttons
+        self.game.info_label = MagicMock()
+        self.game.disable_all_buttons = MagicMock()
+
+        # Call game_over
+        self.game.game_over(root)
+
+        # Verify game state
+        self.assertTrue(self.game.gameover)
+        self.assertEqual(self.game.game_result, "Player X won")
+        self.game.info_label.config.assert_called_with(text="Player X won")
+        self.game.disable_all_buttons.assert_called_once()
+
+    ##
+    # @brief Test handling response type gameover and draw.
+    def test_game_over_draw(self):
+        # Prepare game over XML for draw
+        root = ET.fromstring('''
+        <response type="gameover">
+            <status name="Draw"/>
+        </response>
+        ''')
+
+        # Mock info_label and disable_all_buttons
+        self.game.info_label = MagicMock()
+        self.game.disable_all_buttons = MagicMock()
+
+        # Call game_over
+        self.game.game_over(root)
+
+        # Verify game state
+        self.assertTrue(self.game.gameover)
+        self.assertEqual(self.game.game_result, "Draw")
+        self.game.info_label.config.assert_called_with(text="Draw")
+        self.game.disable_all_buttons.assert_called_once()
+
+    ##
+    # @brief Test disabling buttons.
+    def test_disable_all_buttons(self):
+        # Create mock buttons
+        self.game.buttons = [[MagicMock() for _ in range(3)] for _ in range(3)]
+
+        # Call disable_all_buttons
+        self.game.disable_all_buttons()
+
+        # Verify all buttons were disabled
+        for row in self.game.buttons:
+            for button in row:
+                button.config.assert_called_with(state="disabled")
+
+    ##
+    # @brief Test closing game.
+    def test_on_close(self):
+        # Mock save_game, quit, and close_connection methods
+        with patch.object(self.game, 'save_game'), \
+                patch.object(self.game.root, 'quit'), \
+                patch.object(self.game.esp, 'close_connection'):
+            # Capture print output
+            with patch('builtins.print') as mock_print:
+                self.game.on_close()
+
+                # Verify methods were called
+                self.game.save_game.assert_called_once()
+                self.game.root.quit.assert_called_once()
+                self.game.esp.close_connection.assert_called_once()
+                mock_print.assert_called_with("Game closed")
+
+    ##
+    # @brief Test handling response type bot_v_bot.
+    def test_handle_bot_v_bot(self):
+        # Mock necessary methods
+        self.game.disable_all_buttons = MagicMock()
+        self.game.back_button = MagicMock()
+        self.game.process_bot_move = MagicMock()
+
+        # Call handle_bot_v_bot
+        self.game.handle_bot_v_bot()
+
+        # Verify methods were called
+        self.game.disable_all_buttons.assert_called_once()
+        self.game.back_button.config.assert_called_with(state="disabled")
 
 
 ##
@@ -363,6 +726,7 @@ class TestESP32Server(unittest.TestCase):
 
             mock_write.assert_any_call((request + '\n').encode())
             mock_readline.assert_called()
+
 
 ##
 # @brief Run all tests.

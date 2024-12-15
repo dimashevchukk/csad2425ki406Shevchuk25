@@ -1,2 +1,2 @@
 <?xml version='1.0' encoding='utf-8'?>
-<GameState><Board><Row>X, , </Row><Row> , , </Row><Row> , , </Row></Board><CurrentPlayer>O</CurrentPlayer><GameResult> </GameResult><GameMode>pvp</GameMode></GameState>
+<GameState><Board><Row>O, , </Row><Row> , , </Row><Row> , ,X</Row></Board><CurrentPlayer>X</CurrentPlayer><GameResult> </GameResult><GameMode>botvbot</GameMode></GameState>

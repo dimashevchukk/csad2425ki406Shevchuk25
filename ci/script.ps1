@@ -82,7 +82,12 @@ function UploadSketch
 function RunTests
 {
     Write-Output "Running tests..."
-    python -m pytest --junitxml=test-reports/results.xml client/tests.py
+    & coverage run --omit="*/tests.py" -m pytest --junitxml=test-reports/results.xml client/tests.py
+    & coverage combine
+    & coverage report
+    & coverage html -d test-reports/coverage
+
+    Write-Output "Coverage report generated in 'test-reports/coverage/index.html'."
 
     if ($LASTEXITCODE -eq 0)
     {
