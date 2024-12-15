@@ -164,18 +164,18 @@ class TestESP32Communication(unittest.TestCase):
 # @brief Test graphic interface.
 class TestUI(unittest.TestCase):
     ##
-    # @Brief Set up game and esp
+    # @brief Set up game and esp
     def setUp(self):
         self.game = TicTacToe()
         self.game.esp = esp32()
 
     ##
-    # @Brief Destroy window root
+    # @brief Destroy window root
     def tearDown(self):
         self.game.root.destroy()
 
     ##
-    # @Brief Test that main menu contains all required buttons.
+    # @brief Test that main menu contains all required buttons.
     def test_initial_main_menu_elements(self):
         self.game.create_main_menu()
 
@@ -195,7 +195,7 @@ class TestUI(unittest.TestCase):
             self.assertTrue(found, f"Button '{text}' not found in main menu")
 
     ##
-    # @Brief Test game mode selection initiates correct game setup.
+    # @brief Test game mode selection initiates correct game setup.
     def test_game_mode_selection(self):
         game_modes = ["pvp", "pvbot", "botvbot"]
 
@@ -214,7 +214,7 @@ class TestUI(unittest.TestCase):
                 mock_create_board.assert_called_once()
 
     ##
-    # @Brief Test board creation UI elements.
+    # @brief Test board creation UI elements.
     def test_board_creation(self):
         self.game.start_game("pvp")
         self.assertEqual(len(self.game.buttons), 3)
@@ -226,7 +226,7 @@ class TestUI(unittest.TestCase):
                 self.assertEqual(button.cget('text'), ' ')
 
     ##
-    # @Brief Test move validation and UI update.
+    # @brief Test move validation and UI update.
     def test_move_validation(self):
         self.game.start_game("pvp")
 
@@ -238,7 +238,7 @@ class TestUI(unittest.TestCase):
         self.assertEqual(self.game.buttons[row][col].cget('state'), 'disabled')
 
     ##
-    # @Brief Test player switching mechanism.
+    # @brief Test player switching mechanism.
     def test_player_switch(self):
         self.game.start_game("pvp")
 
@@ -250,7 +250,7 @@ class TestUI(unittest.TestCase):
         self.assertTrue('O' in self.game.info_label.cget('text'))
 
     ##
-    # @Brief Test game saving and loading functionality.
+    # @brief Test game saving and loading functionality.
     def test_game_save_and_load(self):
         self.game.start_game("pvp")
         self.game.make_move(0, 0)
@@ -265,7 +265,7 @@ class TestUI(unittest.TestCase):
         self.assertEqual(new_game.current_player, 'X')
 
     ##
-    # @Brief Test error handling during game loading.
+    # @brief Test error handling during game loading.
     @patch('xml.etree.ElementTree.parse')
     def test_load_game_error_handling(self, mock_parse):
         mock_parse.side_effect = FileNotFoundError()
@@ -281,7 +281,7 @@ class TestUI(unittest.TestCase):
             mock_print.assert_called_with(f"Error: Failed to parse the XML file {self.game.file_name}.")
 
     ##
-    # @Brief Test starting by choosing manual input
+    # @brief Test starting by choosing manual input
     def test_start_config_manual_input(self):
         # Configure the mock connect method to return a specific value
         self.game.esp.connect = MagicMock(return_value="Connected successfully")
@@ -299,7 +299,7 @@ class TestUI(unittest.TestCase):
             mock_print.assert_called_with("Connected successfully")
 
     ##
-    # @Brief Test starting by choosing file input.
+    # @brief Test starting by choosing file input.
     def test_start_config_file_input(self):
         # Configure the mock connect_from_file method to return a specific value
         self.game.esp.connect_from_file = MagicMock(return_value="Loaded from file")
@@ -317,7 +317,7 @@ class TestUI(unittest.TestCase):
             mock_print.assert_called_with("Loaded from file")
 
     ##
-    # @Brief Test invalid input while starting.
+    # @brief Test invalid input while starting.
     def test_invalid_input(self):
         # Test handling of invalid input
         with patch('builtins.input', side_effect=['3', '1']):
@@ -332,7 +332,7 @@ class TestUI(unittest.TestCase):
                 self.game.esp.connect.assert_called_once()
 
     ##
-    # @Brief Test returning to menu.
+    # @brief Test returning to menu.
     def test_back_to_menu(self):
         # Setup: Create some widgets to destroy
         tk.Button(self.game.root, text="Test Button").pack()
@@ -350,7 +350,7 @@ class TestUI(unittest.TestCase):
             self.assertEqual(len(self.game.root.winfo_children()), 0)
 
     ##
-    # @Brief Test handling response.
+    # @brief Test handling response.
     def test_handle_response_mode(self):
         # XML for bot vs bot mode
         xml_response = '''
@@ -365,7 +365,7 @@ class TestUI(unittest.TestCase):
             self.game.handle_bot_v_bot.assert_called_once()
 
     ##
-    # @Brief Test handling response type move.
+    # @brief Test handling response type move.
     def test_handle_response_move(self):
         # XML for a move response
         xml_response = '''
@@ -380,7 +380,7 @@ class TestUI(unittest.TestCase):
             mock_handle_move.assert_called_once()
 
     ##
-    # @Brief Test handling response type gameover.
+    # @brief Test handling response type gameover.
     def test_handle_response_gameover(self):
         # XML for game over response
         xml_response = '''
@@ -395,7 +395,7 @@ class TestUI(unittest.TestCase):
             mock_game_over.assert_called_once()
 
     ##
-    # @Brief Test handling response type move.
+    # @brief Test handling response type move.
     def test_handle_move(self):
         # Prepare XML for move
         root = ET.fromstring('''
@@ -429,7 +429,7 @@ class TestUI(unittest.TestCase):
         )
 
     ##
-    # @Brief Test handling response type gameover and player X wins.
+    # @brief Test handling response type gameover and player X wins.
     def test_game_over_x_win(self):
         # Prepare game over XML for X win
         root = ET.fromstring('''
@@ -452,7 +452,7 @@ class TestUI(unittest.TestCase):
         self.game.disable_all_buttons.assert_called_once()
 
     ##
-    # @Brief Test handling response type gameover and draw.
+    # @brief Test handling response type gameover and draw.
     def test_game_over_draw(self):
         # Prepare game over XML for draw
         root = ET.fromstring('''
@@ -475,7 +475,7 @@ class TestUI(unittest.TestCase):
         self.game.disable_all_buttons.assert_called_once()
 
     ##
-    # @Brief Test disabling buttons.
+    # @brief Test disabling buttons.
     def test_disable_all_buttons(self):
         # Create mock buttons
         self.game.buttons = [[MagicMock() for _ in range(3)] for _ in range(3)]
@@ -489,7 +489,7 @@ class TestUI(unittest.TestCase):
                 button.config.assert_called_with(state="disabled")
 
     ##
-    # @Brief Test closing game.
+    # @brief Test closing game.
     def test_on_close(self):
         # Mock save_game, quit, and close_connection methods
         with patch.object(self.game, 'save_game'), \
@@ -506,7 +506,7 @@ class TestUI(unittest.TestCase):
                 mock_print.assert_called_with("Game closed")
 
     ##
-    # @Brief Test handling response type bot_v_bot.
+    # @brief Test handling response type bot_v_bot.
     def test_handle_bot_v_bot(self):
         # Mock necessary methods
         self.game.disable_all_buttons = MagicMock()
